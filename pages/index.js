@@ -11,7 +11,27 @@ export default function Home() {
   };
 
   const onTrackEndListener = () => {
-    //no-opt
+    if (track !== 47) {
+      setTrack((prevState) => prevState + 1);
+    } else {
+      console.log("You have reached End Of Playlist");
+    }
+  };
+
+  const onPlayerNextTrackListener = () => {
+    if (track !== 47) {
+      setTrack((prevState) => prevState + 1);
+    } else {
+      console.log("You have reached End Of Playlist");
+    }
+  };
+
+  const onPlayerPrevTrackListener = () => {
+    if (track !== 0) {
+      setTrack((prevState) => prevState - 1);
+    } else {
+      console.log("No previous Track");
+    }
   };
 
   return (
@@ -43,7 +63,12 @@ export default function Home() {
           );
         })}
       </div>
-      <AudioComponent trackId={track} />
+      <AudioComponent
+        trackId={track}
+        onTrackPlayEnded={onTrackEndListener}
+        onPlayerNextTrack={onPlayerNextTrackListener}
+        onPlayerPrevTrack={onPlayerPrevTrackListener}
+      />
       {/* <Ac trackId={track} onTrackEnd={onTrackEndListener} autoplay={true} /> */}
     </React.Fragment>
   );

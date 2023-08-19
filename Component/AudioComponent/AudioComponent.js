@@ -1,12 +1,17 @@
 /** @format */
 
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
 
-const AudioComponent = ({ trackId }) => {
+const AudioComponent = ({
+  trackId,
+  onTrackPlayEnded,
+  onPlayerNextTrack,
+  onPlayerPrevTrack,
+}) => {
   let audioRef = useRef();
   const [playerState, setState] = useState({
     play: false,
@@ -79,6 +84,7 @@ const AudioComponent = ({ trackId }) => {
           prevState["trackDuration"] = 0;
           prevState["trackDurationPlayed"] = 0;
           prevState["playbackRate"] = 1;
+
           break;
         default:
           prevState[key] = value;
@@ -94,8 +100,9 @@ const AudioComponent = ({ trackId }) => {
   };
 
   const onPlayerPlayEndedListener = () => {
-    playerStateManipulator("reset", undefined);
+    // playerStateManipulator("reset", undefined);
     playerStateManipulator("play", false);
+    onTrackPlayEnded();
   };
 
   const onRangeChangeListener = (event) => {
@@ -109,11 +116,15 @@ const AudioComponent = ({ trackId }) => {
   };
 
   const onClickForwardListener = (event) => {
+    playerStateManipulator("play", false);
     playerStateManipulator("reset", undefined);
+    onPlayerNextTrack();
   };
 
   const onClickBackWardListener = (event) => {
+    playerStateManipulator("play", false);
     playerStateManipulator("reset", undefined);
+    onPlayerPrevTrack();
   };
 
   /** Track ID  */
@@ -124,7 +135,7 @@ const AudioComponent = ({ trackId }) => {
       setTimeout(() => {
         playerStateManipulator("reset", undefined);
         playerStateManipulator("play", true);
-      }, 2000);
+      }, 1200);
     }
   }, [trackId]);
 
