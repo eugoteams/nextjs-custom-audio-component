@@ -7,16 +7,12 @@ export default function Home() {
   const [track, setTrack] = useState(0);
 
   const onTrackSelect = (trackID) => {
-    console.log(trackID);
     setTrack((prevState) => trackID);
   };
 
   const onTrackEndListener = () => {
     //no-opt
   };
-  useEffect(() => {
-    console.log("Track updated", track);
-  }, [track]);
 
   return (
     <React.Fragment>

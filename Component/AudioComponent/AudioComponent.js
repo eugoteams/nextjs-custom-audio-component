@@ -14,7 +14,7 @@ const AudioComponent = ({ trackId }) => {
     trackDurationPlayed: 0,
     optMenu: false,
     playbackRate: 1,
-    playerClosed: true,
+    playerClosed: false,
   });
 
   let playbackRate = [
@@ -46,7 +46,19 @@ const AudioComponent = ({ trackId }) => {
               audioRef.current.currentTime = prevState["trackDurationPlayed"];
               audioRef.current.playbackRate = prevState["playbackRate"];
             }
-            audioRef.current.play();
+            let playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then((_) => {
+                  // Automatic playback started!
+                  // Show playing UI.
+                })
+                .catch((error) => {
+                  // Auto-play was prevented
+                  // Show paused UI.
+                  //console.log("error", error);
+                });
+            }
           } else {
             audioRef.current.pause();
           }
@@ -67,7 +79,6 @@ const AudioComponent = ({ trackId }) => {
           prevState["trackDuration"] = 0;
           prevState["trackDurationPlayed"] = 0;
           prevState["playbackRate"] = 1;
-          console.log("state - reset", prevState);
           break;
         default:
           prevState[key] = value;
@@ -105,86 +116,103 @@ const AudioComponent = ({ trackId }) => {
     playerStateManipulator("reset", undefined);
   };
 
+  /** Track ID  */
   useEffect(() => {
-    playerStateManipulator("reset", undefined);
-    playerStateManipulator("play", true);
+    if (trackId !== 0 && trackId !== undefined) {
+      playerStateManipulator("playerClosed", true);
+      playerStateManipulator("reset", undefined);
+      setTimeout(() => {
+        playerStateManipulator("reset", undefined);
+        playerStateManipulator("play", true);
+      }, 2000);
+    }
   }, [trackId]);
 
   return (
     <React.Fragment>
-      <audio
-        style={{ display: "none" }}
-        ref={audioRef}
-        onTimeUpdate={onPlayerDurationUpdateListener}
-        onEnded={onPlayerPlayEndedListener}
-        preload="metadata"
-        onLoadedMetadata={onLoadMetaDataListener}
-      ></audio>
-      <div className={`${classes.container}`}>
+      {playerState["playerClosed"] && (
         <div>
-          <input
-            type="range"
-            className={`${classes.slider}`}
-            onChange={onRangeChangeListener}
-            value={playerState["trackDurationPlayed"]}
-            min={0}
-            max={playerState["trackDuration"]}
-          />
-        </div>
-        <div>{convertSecToMinutes(playerState["trackDurationPlayed"])}</div>
-        <div className={`${classes.controls}`}>
-          <div
-            className={`${classes.icons} `}
-            onClick={(e) => playerStateManipulator("optMenu", true)}
-          >
-            <PiDotsThreeOutlineFill />
-          </div>
-          <div className={`${classes.icons}`} onClick={onClickBackWardListener}>
-            <FaBackward />
-          </div>
-          <div className={`${classes.icons}`}>
-            {playerState["play"] ? (
-              <FaPause
-                onClick={(e) => {
-                  playerStateManipulator("play", false);
-                }}
+          <audio
+            style={{ display: "none" }}
+            ref={audioRef}
+            onTimeUpdate={onPlayerDurationUpdateListener}
+            onEnded={onPlayerPlayEndedListener}
+            preload="metadata"
+            onLoadedMetadata={onLoadMetaDataListener}
+          ></audio>
+          <div className={`${classes.container}`}>
+            <div>
+              <input
+                type="range"
+                className={`${classes.slider}`}
+                onChange={onRangeChangeListener}
+                value={playerState["trackDurationPlayed"]}
+                min={0}
+                max={playerState["trackDuration"]}
               />
-            ) : (
-              <FaPlay
-                onClick={(e) => {
-                  playerStateManipulator("play", true);
-                }}
-              />
+            </div>
+            <div>{convertSecToMinutes(playerState["trackDurationPlayed"])}</div>
+            <div className={`${classes.controls}`}>
+              <div
+                className={`${classes.icons} `}
+                onClick={(e) => playerStateManipulator("optMenu", true)}
+              >
+                <PiDotsThreeOutlineFill />
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={onClickBackWardListener}
+              >
+                <FaBackward />
+              </div>
+              <div className={`${classes.icons}`}>
+                {playerState["play"] ? (
+                  <FaPause
+                    onClick={(e) => {
+                      playerStateManipulator("play", false);
+                    }}
+                  />
+                ) : (
+                  <FaPlay
+                    onClick={(e) => {
+                      playerStateManipulator("play", true);
+                    }}
+                  />
+                )}
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={onClickForwardListener}
+              >
+                <FaForward />
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={(e) => playerStateManipulator("playerClosed", false)}
+              >
+                <GrClose />
+              </div>
+            </div>
+            <div>{convertSecToMinutes(playerState["trackDuration"])}</div>
+            {playerState["optMenu"] && (
+              <div className={`${classes.playback_opt}`}>
+                {playbackRate.map((playRate, index) => {
+                  return (
+                    <span
+                      key={`${playRate}_${index}`}
+                      onClick={(e) =>
+                        playerStateManipulator("playbackRate", playRate)
+                      }
+                    >
+                      {playRate}
+                    </span>
+                  );
+                })}
+              </div>
             )}
           </div>
-          <div className={`${classes.icons}`} onClick={onClickForwardListener}>
-            <FaForward />
-          </div>
-          <div
-            className={`${classes.icons}`}
-            onClick={(e) => playerStateManipulator("playerClosed", true)}
-          >
-            <GrClose />
-          </div>
         </div>
-        <div>{convertSecToMinutes(playerState["trackDuration"])}</div>
-        {playerState["optMenu"] && (
-          <div className={`${classes.playback_opt}`}>
-            {playbackRate.map((playRate, index) => {
-              return (
-                <span
-                  key={`${playRate}_${index}`}
-                  onClick={(e) =>
-                    playerStateManipulator("playbackRate", playRate)
-                  }
-                >
-                  {playRate}
-                </span>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      )}
     </React.Fragment>
   );
 };

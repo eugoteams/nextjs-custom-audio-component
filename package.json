@@ -13,5 +13,9 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1"
-  }
+  },
+  "description": "A custom player build with audio tag of html5.",
+  "main": "next.config.js",
+  "author": "",
+  "license": "ISC"
 }
