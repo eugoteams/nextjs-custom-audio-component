@@ -6,13 +6,9 @@ import React, { useEffect, useState } from "react";
 export default function Home() {
   const [track, setTrack] = useState(0);
   const [log, setLog] = useState("");
-  const audioContext = new AudioContext();
 
   const onTrackSelect = (trackID) => {
-    audioContext.resume();
-    setTimeout(() => {
-      setTrack((prevState) => trackID);
-    }, 1200);
+    setTrack((prevState) => trackID);
   };
 
   const onTrackEndListener = () => {
