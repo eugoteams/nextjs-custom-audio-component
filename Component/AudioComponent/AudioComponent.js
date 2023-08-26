@@ -43,7 +43,17 @@ const AudioComponent = ({
   };
 
   const playerStateManipulator = (key, value) => {
-    const sound = new Howl({ src: [`/sound/1/${trackId}.mp3`], preload: true });
+    const sound = new Howl({
+      src: [`/sound/1/${trackId}.mp3`],
+      preload: true,
+      onplayerror: function () {
+        onLog("play_error");
+        sound.once("unlock", function () {
+          onLog("play_unlock_play");
+          sound.play();
+        });
+      },
+    });
     setState((prevState) => {
       switch (true) {
         case key === "play":
