@@ -66,7 +66,6 @@ const AudioComponent = ({
                   // Show paused UI.
                   //console.log("error", error);
                   onLog(error);
-                  playerStateManipulator("play", true);
                 });
             }
           } else {
