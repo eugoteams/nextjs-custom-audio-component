@@ -11,6 +11,7 @@ const AudioComponent = ({
   onTrackPlayEnded,
   onPlayerNextTrack,
   onPlayerPrevTrack,
+  onLog,
 }) => {
   let audioRef = useRef();
   const [playerState, setState] = useState({
@@ -47,6 +48,7 @@ const AudioComponent = ({
           if (value) {
             audioRef.current.src = `/sound/1/${trackId}.mp3`;
             audioRef.current.load();
+            onLog("loading");
             if (prevState["trackDurationPlayed"] > 0) {
               audioRef.current.currentTime = prevState["trackDurationPlayed"];
               audioRef.current.playbackRate = prevState["playbackRate"];
@@ -57,11 +59,13 @@ const AudioComponent = ({
                 .then((_) => {
                   // Automatic playback started!
                   // Show playing UI.
+                  onLog("play");
                 })
                 .catch((error) => {
                   // Auto-play was prevented
                   // Show paused UI.
                   //console.log("error", error);
+                  onLog("error", error);
                 });
             }
           } else {

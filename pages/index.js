@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 
 export default function Home() {
   const [track, setTrack] = useState(0);
+  const [log, setLog] = useState("");
 
   const onTrackSelect = (trackID) => {
     setTrack((prevState) => trackID);
@@ -34,6 +35,10 @@ export default function Home() {
     }
   };
 
+  const onLogListener = (log) => {
+    setLog((prevState) => log);
+  };
+
   return (
     <React.Fragment>
       <h1 style={{ margin: "2rem auto", textAlign: "center" }}>Tracks</h1>
@@ -47,6 +52,7 @@ export default function Home() {
           margin: "2rem auto",
         }}
       >
+        <div>{log}</div>
         {[...Array(47)].map((_, index) => {
           let id = index + 1;
           return (
@@ -68,6 +74,7 @@ export default function Home() {
         onTrackPlayEnded={onTrackEndListener}
         onPlayerNextTrack={onPlayerNextTrackListener}
         onPlayerPrevTrack={onPlayerPrevTrackListener}
+        onLog={onLogListener}
       />
       {/* <Ac trackId={track} onTrackEnd={onTrackEndListener} autoplay={true} /> */}
     </React.Fragment>
