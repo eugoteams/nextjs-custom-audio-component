@@ -66,7 +66,7 @@ const AudioComponent = ({
                   // Auto-play was prevented
                   // Show paused UI.
                   //console.log("error", error);
-                  playerStateManipulator("play", true);
+                  playerStateManipulator("play", false);
                   let audio = new Audio();
 
                   onLog("error" + error);
