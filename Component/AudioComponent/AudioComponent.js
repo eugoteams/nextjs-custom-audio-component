@@ -43,49 +43,34 @@ const AudioComponent = ({
   };
 
   const playerStateManipulator = (key, value) => {
-    const sound = new Howl({
-      src: [`/sound/1/${trackId}.mp3`],
-      preload: true,
-      onplayerror: function () {
-        onLog("play_error");
-        sound.once("unlock", function () {
-          onLog("play_unlock_play");
-          sound.play();
-        });
-      },
-    });
     setState((prevState) => {
       switch (true) {
         case key === "play":
           if (value) {
-            console.log("play");
-            onLog("play");
-            sound.play();
-            // audioRef.current.src = `/sound/1/${trackId}.mp3`;
-            // audioRef.current.load();
-
-            // onLog("loading");
-            // if (prevState["trackDurationPlayed"] > 0) {
-            //   audioRef.current.currentTime = prevState["trackDurationPlayed"];
-            //   audioRef.current.playbackRate = prevState["playbackRate"];
-            // }
-            // let playPromise = audioRef.current.play();
-            // if (playPromise !== undefined) {
-            //   playPromise
-            //     .then((_) => {
-            //       // Automatic playback started!
-            //       // Show playing UI.
-            //       onLog("play");
-            //     })
-            //     .catch((error) => {
-            //       // Auto-play was prevented
-            //       // Show paused UI.
-            //       console.log("error", error);
-            //       onLog("error" + error);
-            //     });
-            // }
+            audioRef.current.src = `/sound/1/${trackId}.mp3`;
+            audioRef.current.load();
+            onLog("loading");
+            if (prevState["trackDurationPlayed"] > 0) {
+              audioRef.current.currentTime = prevState["trackDurationPlayed"];
+              audioRef.current.playbackRate = prevState["playbackRate"];
+            }
+            let playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then((_) => {
+                  // Automatic playback started!
+                  // Show playing UI.
+                  onLog("play");
+                })
+                .catch((error) => {
+                  // Auto-play was prevented
+                  // Show paused UI.
+                  console.log("error", error);
+                  onLog("error" + error);
+                });
+            }
           } else {
-            // audioRef.current.pause();
+            audioRef.current.pause();
             console.log("pause");
             sound.pause();
           }
