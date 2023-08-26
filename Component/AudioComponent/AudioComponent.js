@@ -43,7 +43,7 @@ const AudioComponent = ({
   };
 
   const playerStateManipulator = (key, value) => {
-    const sound = new Howl({ src: [`/sound/1/${trackId}.mp3`] });
+    const sound = new Howl({ src: [`/sound/1/${trackId}.mp3`], preload: true });
     setState((prevState) => {
       switch (true) {
         case key === "play":
