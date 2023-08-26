@@ -8,10 +8,10 @@ export default function Home() {
   const [log, setLog] = useState("");
 
   const onTrackSelect = (trackID) => {
-    let audio = new Audio(`/sound/1/1.mp3`);
+    let audio = new Audio(`/sound/1/0.mp3`);
     audio.play();
     setTimeout(() => {
-      audio.play();
+      audio.pause();
       setTrack((prevState) => trackID);
     }, 1200);
   };
