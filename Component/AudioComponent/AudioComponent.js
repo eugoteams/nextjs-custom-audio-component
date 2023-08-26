@@ -48,6 +48,7 @@ const AudioComponent = ({
           if (value) {
             audioRef.current.src = `/sound/1/${trackId}.mp3`;
             audioRef.current.load();
+
             onLog("loading");
             if (prevState["trackDurationPlayed"] > 0) {
               audioRef.current.currentTime = prevState["trackDurationPlayed"];
@@ -148,6 +149,7 @@ const AudioComponent = ({
       {playerState["playerClosed"] && (
         <div>
           <audio
+            autoPlay
             style={{ display: "none" }}
             ref={audioRef}
             onTimeUpdate={onPlayerDurationUpdateListener}
