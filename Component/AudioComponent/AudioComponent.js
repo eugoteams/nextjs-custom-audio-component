@@ -49,6 +49,7 @@ const AudioComponent = ({
         case key === "play":
           if (value) {
             console.log("play");
+            onLog("play");
             sound.play();
             // audioRef.current.src = `/sound/1/${trackId}.mp3`;
             // audioRef.current.load();
