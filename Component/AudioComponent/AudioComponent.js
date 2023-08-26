@@ -65,7 +65,8 @@ const AudioComponent = ({
                   // Auto-play was prevented
                   // Show paused UI.
                   //console.log("error", error);
-                  onLog("error", error);
+                  onLog(error);
+                  playerStateManipulator("play", true);
                 });
             }
           } else {
