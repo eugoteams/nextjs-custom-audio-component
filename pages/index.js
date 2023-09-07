@@ -78,7 +78,7 @@ export default function Home() {
         onPlayerPrevTrack={onPlayerPrevTrackListener}
         onLog={onLogListener}
       />
-      <AdComponent ref={audioRef} />
+      {/* <AdComponent ref={audioRef} /> */}
     </React.Fragment>
   );
 }
