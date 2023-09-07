@@ -1,12 +1,13 @@
 /** @format */
 
+import AdComponent from "@/Component/AudioComponent/AdComponent";
 import AudioComponent from "@/Component/AudioComponent/AudioComponent";
 import React, { useEffect, useState } from "react";
 
 export default function Home() {
   const [track, setTrack] = useState(0);
   const [log, setLog] = useState("");
-
+  const audioRef = React.createRef();
   const onTrackSelect = (trackID) => {
     setTrack((prevState) => trackID);
   };
@@ -77,7 +78,7 @@ export default function Home() {
         onPlayerPrevTrack={onPlayerPrevTrackListener}
         onLog={onLogListener}
       />
-      {/* <Ac trackId={track} onTrackEnd={onTrackEndListener} autoplay={true} /> */}
+      <AdComponent ref={audioRef} />
     </React.Fragment>
   );
 }

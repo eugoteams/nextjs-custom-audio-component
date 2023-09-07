@@ -146,7 +146,7 @@ const AudioComponent = ({
       playerStateManipulator("reset", undefined);
       setTimeout(() => {
         playerStateManipulator("reset", undefined);
-        playerStateManipulator("play", true);
+        // playerStateManipulator("play", true);
       }, 1200);
     }
   }, [trackId]);
