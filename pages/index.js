@@ -53,6 +53,7 @@ export default function Home() {
         }}
       >
         <div>{log}</div>
+        <div style={{ fontSize: "2.4rem" }}>{track}</div>
         {[...Array(47)].map((_, index) => {
           let id = index + 1;
           return (

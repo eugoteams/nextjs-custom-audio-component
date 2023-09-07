@@ -5,7 +5,6 @@ import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
-import { Howl, Howler } from "howler";
 
 const AudioComponent = ({
   trackId,
@@ -54,7 +53,13 @@ const AudioComponent = ({
               audioRef.current.currentTime = prevState["trackDurationPlayed"];
               audioRef.current.playbackRate = prevState["playbackRate"];
             }
+
             let playPromise = audioRef.current.play();
+            setTimeout(() => {
+              onLog("remove unmute after few 1000ms");
+              audioRef.current.muted = false;
+            }, 1000);
+
             if (playPromise !== undefined) {
               playPromise
                 .then((_) => {
@@ -72,7 +77,6 @@ const AudioComponent = ({
           } else {
             audioRef.current.pause();
             console.log("pause");
-            sound.pause();
           }
           prevState[key] = value;
           break;
@@ -158,6 +162,7 @@ const AudioComponent = ({
             onEnded={onPlayerPlayEndedListener}
             preload="metadata"
             onLoadedMetadata={onLoadMetaDataListener}
+            muted
           ></audio>
           <div className={`${classes.container}`}>
             <div>
