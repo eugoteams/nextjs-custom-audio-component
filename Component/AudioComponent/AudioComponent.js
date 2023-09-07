@@ -55,12 +55,6 @@ const AudioComponent = ({
             }
 
             let playPromise = audioRef.current.play();
-            setTimeout(() => {
-              onLog("remove unmute after few 1000ms");
-              audioRef.current.muted = false;
-              playerStateManipulator("play", true);
-            }, 3800);
-
             if (playPromise !== undefined) {
               playPromise
                 .then((_) => {
