@@ -8,8 +8,11 @@ export default function Home() {
   const [track, setTrack] = useState(0);
   const [log, setLog] = useState("");
   const audioRef = React.createRef();
+
   const onTrackSelect = (trackID) => {
-    setTrack((prevState) => trackID);
+    //setTrack((prevState) => trackID);
+    audioRef.current.src = `/sound/1/${trackID}.mp3`;
+    audioRef.current.load();
   };
 
   const onTrackEndListener = () => {
@@ -38,6 +41,26 @@ export default function Home() {
 
   const onLogListener = (log) => {
     setLog((prevState) => log);
+  };
+
+  //AdComponenet control Listener
+  const controlListener = (value) => {
+    console.log("Control Listener --->", value);
+    switch (true) {
+      case value === "play":
+        audioRef.current.play();
+        break;
+      case value === "pause":
+        audioRef.current.pause();
+        break;
+      case value === "forward":
+        break;
+      case value === "backward":
+        break;
+      default:
+        //no-opt
+        break;
+    }
   };
 
   return (
@@ -71,14 +94,14 @@ export default function Home() {
           );
         })}
       </div>
-      <AudioComponent
+      {/* <AudioComponent
         trackId={track}
         onTrackPlayEnded={onTrackEndListener}
         onPlayerNextTrack={onPlayerNextTrackListener}
         onPlayerPrevTrack={onPlayerPrevTrackListener}
         onLog={onLogListener}
-      />
-      {/* <AdComponent ref={audioRef} /> */}
+      /> */}
+      <AdComponent ref={audioRef} controlListener={controlListener} />
     </React.Fragment>
   );
 }

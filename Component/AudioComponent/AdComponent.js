@@ -1,11 +1,11 @@
 /** @format */
 
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
-const AdComponent = forwardRef((props, ref) => {
+const AdComponent = forwardRef(({ controlListener }, ref) => {
   const [playerState, setState] = useState({
     play: false,
     trackDuration: 0,
@@ -14,6 +14,7 @@ const AdComponent = forwardRef((props, ref) => {
     playbackRate: 1,
     playerClosed: false,
   });
+  const [play, setPlay] = useState(false);
 
   let playbackRate = [
     "0.25",
@@ -31,31 +32,50 @@ const AdComponent = forwardRef((props, ref) => {
     extraSeconds = extraSeconds < 10 ? "0" + extraSeconds : extraSeconds;
     return `${minutes}:${extraSeconds}`;
   };
+
+  const stateHandler = (key, value) => {
+    setState((prevState) => {
+      prevState[key] = value;
+      return { ...prevState };
+    });
+  };
+
+  // console.log(playerState["play"]);
   return (
     <React.Fragment>
       <div>
         <audio
-          autoPlay
-          style={{ display: "none" }}
           ref={ref}
+          autoPlay
+          preload="metadata"
+          style={{ display: "none" }}
+          onPlay={() => {
+            stateHandler("play", true);
+          }}
+          onPause={() => {
+            stateHandler("play", false);
+          }}
           onTimeUpdate={() => {
-            console.log("onTimeUpdate");
+            stateHandler("trackDurationPlayed", ref.current.currentTime);
           }}
           onEnded={() => {
-            console.log("onended");
+            stateHandler("play", false);
           }}
-          preload="metadata"
-          onLoadedMetadata={() => {
-            console.log("OnLoad meta data listener");
+          onLoad={() => {
+            console.log("Src got loaded");
           }}
-          muted
+          onLoadedMetadata={(value) => {
+            stateHandler("trackDuration", ref.current.duration);
+          }}
         ></audio>
         <div className={`${classes.container}`}>
           <div>
             <input
               type="range"
               className={`${classes.slider}`}
-              onChange={(e) => console.log("range", e.target.value)}
+              onChange={(e) =>
+                stateHandler("trackDurationPlayed", e.target.value)
+              }
               value={playerState["trackDurationPlayed"]}
               min={0}
               max={playerState["trackDuration"]}
@@ -66,16 +86,14 @@ const AdComponent = forwardRef((props, ref) => {
             <div
               className={`${classes.icons} `}
               onClick={(e) => {
-                console.log("menu");
+                stateHandler("optMenu", !playerState["optMenu"]);
               }}
             >
               <PiDotsThreeOutlineFill />
             </div>
             <div
               className={`${classes.icons}`}
-              onClick={(e) => {
-                console.log("backward");
-              }}
+              onClick={(e) => controlListener("backward")}
             >
               <FaBackward />
             </div>
@@ -83,40 +101,46 @@ const AdComponent = forwardRef((props, ref) => {
               {playerState["play"] ? (
                 <FaPause
                   onClick={(e) => {
-                    console.log("pause");
+                    console.log("Player *****", playerState["play"]);
+                    controlListener("pause");
                   }}
                 />
               ) : (
                 <FaPlay
                   onClick={(e) => {
-                    console.log("play");
+                    console.log("Player**** ", playerState["play"]);
+                    controlListener("play");
                   }}
                 />
               )}
             </div>
             <div
               className={`${classes.icons}`}
-              onClick={(e) => {
-                console.log("forward");
-              }}
+              onClick={(e) => controlListener("forward")}
             >
               <FaForward />
             </div>
             <div
               className={`${classes.icons}`}
-              onClick={(e) => console.log("close player")}
+              onClick={(e) => {
+                stateHandler("playerClosed", !playerState["playerClosed"]);
+                controlListener("close");
+              }}
             >
               <GrClose />
             </div>
           </div>
           <div>{convertSecToMinutes(playerState["trackDuration"])}</div>
-          {true && (
+          {playerState["optMenu"] && (
             <div className={`${classes.playback_opt}`}>
               {playbackRate.map((playRate, index) => {
                 return (
                   <span
                     key={`${playRate}_${index}`}
-                    onClick={(e) => console.log(playRate)}
+                    onClick={(e) => {
+                      stateHandler("playbackRate", playRate);
+                      stateHandler("optMenu", !playerState["optMenu"]);
+                    }}
                   >
                     {playRate}
                   </span>
