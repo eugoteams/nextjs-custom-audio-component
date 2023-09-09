@@ -3,6 +3,7 @@
 import AdComponent from "@/Component/AudioComponent/AdComponent";
 import AudioComponent from "@/Component/AudioComponent/AudioComponent";
 import React, { useEffect, useState } from "react";
+import ErrorBoundry from "../Component/ErrorBoundry";
 
 export default function Home() {
   const [track, setTrack] = useState(0);
@@ -10,52 +11,47 @@ export default function Home() {
   const audioRef = React.createRef();
 
   const onTrackSelect = (trackID) => {
-    //setTrack((prevState) => trackID);
-    audioRef.current.src = `/sound/1/${trackID}.mp3`;
+    setTrack((prevState) => trackID);
+    audioSrcLoader(trackID);
+  };
+
+  const audioSrcLoader = (trackId) => {
+    audioRef.current.src = `/sound/1/${trackId}.mp3`;
     audioRef.current.load();
   };
 
-  const onTrackEndListener = () => {
-    if (track !== 47) {
-      setTrack((prevState) => prevState + 1);
-    } else {
-      console.log("You have reached End Of Playlist");
-    }
-  };
-
-  const onPlayerNextTrackListener = () => {
-    if (track !== 47) {
-      setTrack((prevState) => prevState + 1);
-    } else {
-      console.log("You have reached End Of Playlist");
-    }
-  };
-
-  const onPlayerPrevTrackListener = () => {
-    if (track !== 0) {
-      setTrack((prevState) => prevState - 1);
-    } else {
-      console.log("No previous Track");
-    }
-  };
-
-  const onLogListener = (log) => {
-    setLog((prevState) => log);
-  };
-
   //AdComponenet control Listener
-  const controlListener = (value) => {
-    console.log("Control Listener --->", value);
-    switch (true) {
-      case value === "play":
+  const controlListener = (action) => {
+    switch (action.type) {
+      case "play":
         audioRef.current.play();
         break;
-      case value === "pause":
+      case "pause":
         audioRef.current.pause();
         break;
-      case value === "forward":
+      case "forward":
+        let nextTrack = track + 1;
+        setTrack((prevState) => nextTrack);
+        audioSrcLoader(nextTrack);
+        console.log("forward", track);
         break;
-      case value === "backward":
+      case "backward":
+        let prevTrack = track - 1;
+        if (prevTrack > 0) {
+          setTrack((prevState) => prevTrack);
+          audioSrcLoader(prevTrack);
+          console.log("backward");
+        }
+
+        break;
+      case "seek":
+        audioRef.current.currentTime = action.payload;
+        break;
+      case "close":
+        audioRef.current.pause();
+        break;
+      case "playBackRate":
+        audioRef.current.playbackRate = action.payload;
         break;
       default:
         //no-opt
@@ -65,43 +61,41 @@ export default function Home() {
 
   return (
     <React.Fragment>
-      <h1 style={{ margin: "2rem auto", textAlign: "center" }}>Tracks</h1>
-      <div
-        style={{
-          width: "34rem",
-          height: "27rem",
-          overflow: "auto",
-          textAlign: "center",
-          padding: "1rem",
-          margin: "2rem auto",
-        }}
-      >
-        <div>{log}</div>
-        <div style={{ fontSize: "2.4rem" }}>{track}</div>
-        {[...Array(47)].map((_, index) => {
-          let id = index + 1;
-          return (
-            <p
-              style={{
-                margin: "1rem auto",
-                textAlign: "center",
-                fontSize: "2rem",
-                cursor: "pointer",
-              }}
-              key={id}
-              onClick={(e) => onTrackSelect(id)}
-            >{`Audio ${id}.mp3`}</p>
-          );
-        })}
-      </div>
-      {/* <AudioComponent
-        trackId={track}
-        onTrackPlayEnded={onTrackEndListener}
-        onPlayerNextTrack={onPlayerNextTrackListener}
-        onPlayerPrevTrack={onPlayerPrevTrackListener}
-        onLog={onLogListener}
-      /> */}
-      <AdComponent ref={audioRef} controlListener={controlListener} />
+      <ErrorBoundry>
+        <h1 style={{ margin: "2rem auto", textAlign: "center" }}>Tracks</h1>
+        <div
+          style={{
+            width: "34rem",
+            height: "27rem",
+            overflow: "auto",
+            textAlign: "center",
+            padding: "1rem",
+            margin: "2rem auto",
+          }}
+        >
+          <div>{log}</div>
+          <div style={{ fontSize: "2.4rem" }}>{track}</div>
+          {[...Array(47)].map((_, index) => {
+            let id = index + 1;
+            return (
+              <p
+                style={{
+                  margin: "1rem auto",
+                  textAlign: "center",
+                  fontSize: "2rem",
+                  cursor: "pointer",
+                }}
+                key={id}
+                onClick={(e) => {
+                  onTrackSelect(id);
+                }}
+              >{`Audio ${id}.mp3`}</p>
+            );
+          })}
+        </div>
+
+        <AdComponent ref={audioRef} controlListener={controlListener} />
+      </ErrorBoundry>
     </React.Fragment>
   );
 }

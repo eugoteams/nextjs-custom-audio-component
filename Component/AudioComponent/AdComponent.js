@@ -3,7 +3,7 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
-import { PiDotsThreeOutlineFill } from "react-icons/pi";
+import { PiCoinsBold, PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
 const AdComponent = forwardRef(({ controlListener }, ref) => {
   const [playerState, setState] = useState({
@@ -14,7 +14,6 @@ const AdComponent = forwardRef(({ controlListener }, ref) => {
     playbackRate: 1,
     playerClosed: false,
   });
-  const [play, setPlay] = useState(false);
 
   let playbackRate = [
     "0.25",
@@ -26,6 +25,7 @@ const AdComponent = forwardRef(({ controlListener }, ref) => {
     "1.75",
     "2",
   ];
+
   const convertSecToMinutes = (time) => {
     let minutes = Math.floor(time / 60);
     let extraSeconds = Math.round(time % 60);
@@ -51,6 +51,9 @@ const AdComponent = forwardRef(({ controlListener }, ref) => {
           style={{ display: "none" }}
           onPlay={() => {
             stateHandler("play", true);
+            if (!playerState["playerClosed"]) {
+              stateHandler("playerClosed", !playerState["playerClosed"]);
+            }
           }}
           onPause={() => {
             stateHandler("play", false);
@@ -61,94 +64,98 @@ const AdComponent = forwardRef(({ controlListener }, ref) => {
           onEnded={() => {
             stateHandler("play", false);
           }}
-          onLoad={() => {
-            console.log("Src got loaded");
-          }}
           onLoadedMetadata={(value) => {
             stateHandler("trackDuration", ref.current.duration);
           }}
         ></audio>
-        <div className={`${classes.container}`}>
-          <div>
-            <input
-              type="range"
-              className={`${classes.slider}`}
-              onChange={(e) =>
-                stateHandler("trackDurationPlayed", e.target.value)
-              }
-              value={playerState["trackDurationPlayed"]}
-              min={0}
-              max={playerState["trackDuration"]}
-            />
-          </div>
-          <div>{convertSecToMinutes(playerState["trackDurationPlayed"])}</div>
-          <div className={`${classes.controls}`}>
-            <div
-              className={`${classes.icons} `}
-              onClick={(e) => {
-                stateHandler("optMenu", !playerState["optMenu"]);
-              }}
-            >
-              <PiDotsThreeOutlineFill />
+        {playerState["playerClosed"] && (
+          <div className={`${classes.container}`}>
+            <div>
+              <input
+                type="range"
+                className={`${classes.slider}`}
+                onChange={(e) => {
+                  controlListener({ type: "seek", payload: e.target.value });
+                  stateHandler("trackDurationPlayed", e.target.value);
+                }}
+                value={playerState["trackDurationPlayed"]}
+                min={0}
+                max={playerState["trackDuration"]}
+              />
             </div>
-            <div
-              className={`${classes.icons}`}
-              onClick={(e) => controlListener("backward")}
-            >
-              <FaBackward />
-            </div>
-            <div className={`${classes.icons}`}>
-              {playerState["play"] ? (
-                <FaPause
-                  onClick={(e) => {
-                    console.log("Player *****", playerState["play"]);
-                    controlListener("pause");
-                  }}
-                />
-              ) : (
-                <FaPlay
-                  onClick={(e) => {
-                    console.log("Player**** ", playerState["play"]);
-                    controlListener("play");
-                  }}
-                />
-              )}
-            </div>
-            <div
-              className={`${classes.icons}`}
-              onClick={(e) => controlListener("forward")}
-            >
-              <FaForward />
-            </div>
-            <div
-              className={`${classes.icons}`}
-              onClick={(e) => {
-                stateHandler("playerClosed", !playerState["playerClosed"]);
-                controlListener("close");
-              }}
-            >
-              <GrClose />
-            </div>
-          </div>
-          <div>{convertSecToMinutes(playerState["trackDuration"])}</div>
-          {playerState["optMenu"] && (
-            <div className={`${classes.playback_opt}`}>
-              {playbackRate.map((playRate, index) => {
-                return (
-                  <span
-                    key={`${playRate}_${index}`}
+            <div>{convertSecToMinutes(playerState["trackDurationPlayed"])}</div>
+            <div className={`${classes.controls}`}>
+              <div
+                className={`${classes.icons} `}
+                onClick={(e) => {
+                  stateHandler("optMenu", !playerState["optMenu"]);
+                }}
+              >
+                <PiDotsThreeOutlineFill />
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={(e) => controlListener({ type: "backward" })}
+              >
+                <FaBackward />
+              </div>
+              <div className={`${classes.icons}`}>
+                {playerState["play"] ? (
+                  <FaPause
                     onClick={(e) => {
-                      stateHandler("playbackRate", playRate);
-                      stateHandler("optMenu", !playerState["optMenu"]);
+                      console.log("Player *****", playerState["play"]);
+                      controlListener({ type: "pause" });
                     }}
-                  >
-                    {playRate}
-                  </span>
-                );
-              })}
+                  />
+                ) : (
+                  <FaPlay
+                    onClick={(e) => {
+                      console.log("Player**** ", playerState["play"]);
+                      controlListener({ type: "play" });
+                    }}
+                  />
+                )}
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={(e) => controlListener({ type: "forward" })}
+              >
+                <FaForward />
+              </div>
+              <div
+                className={`${classes.icons}`}
+                onClick={(e) => {
+                  stateHandler("playerClosed", !playerState["playerClosed"]);
+                  controlListener({ type: "close" });
+                }}
+              >
+                <GrClose />
+              </div>
             </div>
-          )}
-        </div>
+            <div>{convertSecToMinutes(playerState["trackDuration"])}</div>
+            {playerState["optMenu"] && (
+              <div className={`${classes.playback_opt}`}>
+                {playbackRate.map((playRate, index) => {
+                  return (
+                    <span
+                      key={`${playRate}_${index}`}
+                      onClick={(e) => {
+                        stateHandler("playbackRate", playRate);
+                        stateHandler("optMenu", !playerState["optMenu"]);
+                        controlListener({
+                          type: "playBackRate",
+                          payload: playRate === "normal" ? 1 : playRate,
+                        });
+                      }}
+                    >
+                      {playRate}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </React.Fragment>
   );
