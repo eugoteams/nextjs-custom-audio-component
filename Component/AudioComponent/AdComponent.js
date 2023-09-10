@@ -1,9 +1,9 @@
 /** @format */
 
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useState } from "react";
 import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
-import { PiCoinsBold, PiDotsThreeOutlineFill } from "react-icons/pi";
+import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
 const AdComponent = forwardRef(({ controlListener }, ref) => {
   const [playerState, setState] = useState({
