@@ -1,19 +1,12 @@
 /** @format */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef } from "react";
 import classes from "./AudioComponent.module.css";
 import { FaForward, FaPlay, FaBackward, FaPause } from "react-icons/fa";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { GrClose } from "react-icons/gr";
 
-const AudioComponent = ({
-  trackId,
-  onTrackPlayEnded,
-  onPlayerNextTrack,
-  onPlayerPrevTrack,
-  onLog,
-}) => {
-  let audioRef = useRef();
+const AudioComponent = forwardRef(({ controlListener }, ref) => {
   const [playerState, setState] = useState({
     play: false,
     trackDuration: 0,
@@ -41,129 +34,52 @@ const AudioComponent = ({
     return `${minutes}:${extraSeconds}`;
   };
 
-  const playerStateManipulator = (key, value) => {
+  const stateHandler = (key, value) => {
     setState((prevState) => {
-      switch (true) {
-        case key === "play":
-          if (value) {
-            audioRef.current.src = `/sound/1/${trackId}.mp3`;
-            audioRef.current.load();
-            onLog("loading");
-            if (prevState["trackDurationPlayed"] > 0) {
-              audioRef.current.currentTime = prevState["trackDurationPlayed"];
-              audioRef.current.playbackRate = prevState["playbackRate"];
-            }
-
-            let playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise
-                .then((_) => {
-                  // Automatic playback started!
-                  // Show playing UI.
-                  onLog("play");
-                })
-                .catch((error) => {
-                  // Auto-play was prevented
-                  // Show paused UI.
-                  console.log("error", error);
-                  onLog("error" + error);
-                });
-            }
-          } else {
-            audioRef.current.pause();
-            console.log("pause");
-          }
-          prevState[key] = value;
-          break;
-        case key === "playbackRate":
-          if (value === 0 || value === "normal") {
-            audioRef.current.playbackRate = 1;
-            prevState[key] = 1;
-          } else {
-            audioRef.current.playbackRate = value;
-            prevState[key] = value;
-          }
-
-          prevState["optMenu"] = false;
-          break;
-        case key === "reset":
-          prevState["trackDuration"] = 0;
-          prevState["trackDurationPlayed"] = 0;
-          prevState["playbackRate"] = 1;
-
-          break;
-        default:
-          prevState[key] = value;
-      }
-
+      prevState[key] = value;
       return { ...prevState };
     });
   };
 
-  const onPlayerDurationUpdateListener = () => {
-    let durationPlayed = audioRef.current.currentTime;
-    playerStateManipulator("trackDurationPlayed", durationPlayed);
-  };
-
-  const onPlayerPlayEndedListener = () => {
-    // playerStateManipulator("reset", undefined);
-    playerStateManipulator("play", false);
-    onTrackPlayEnded();
-  };
-
-  const onRangeChangeListener = (event) => {
-    let dragedRange = event.target.value;
-    audioRef.current.currentTime = dragedRange;
-    playerStateManipulator("trackDurationPlayed", dragedRange);
-  };
-
-  const onLoadMetaDataListener = () => {
-    playerStateManipulator("trackDuration", audioRef.current.duration);
-  };
-
-  const onClickForwardListener = (event) => {
-    playerStateManipulator("play", false);
-    playerStateManipulator("reset", undefined);
-    onPlayerNextTrack();
-  };
-
-  const onClickBackWardListener = (event) => {
-    playerStateManipulator("play", false);
-    playerStateManipulator("reset", undefined);
-    onPlayerPrevTrack();
-  };
-
-  /** Track ID  */
-  useEffect(() => {
-    if (trackId !== 0 && trackId !== undefined) {
-      playerStateManipulator("playerClosed", true);
-      playerStateManipulator("reset", undefined);
-      setTimeout(() => {
-        playerStateManipulator("reset", undefined);
-        // playerStateManipulator("play", true);
-      }, 1200);
-    }
-  }, [trackId]);
-
+  // console.log(playerState["play"]);
   return (
     <React.Fragment>
-      {playerState["playerClosed"] && (
-        <div>
-          <audio
-            autoPlay
-            style={{ display: "none" }}
-            ref={audioRef}
-            onTimeUpdate={onPlayerDurationUpdateListener}
-            onEnded={onPlayerPlayEndedListener}
-            preload="metadata"
-            onLoadedMetadata={onLoadMetaDataListener}
-          ></audio>
+      <div>
+        <audio
+          ref={ref}
+          autoPlay
+          preload="metadata"
+          style={{ display: "none" }}
+          onPlay={() => {
+            stateHandler("play", true);
+            if (!playerState["playerClosed"]) {
+              stateHandler("playerClosed", !playerState["playerClosed"]);
+            }
+          }}
+          onPause={() => {
+            stateHandler("play", false);
+          }}
+          onTimeUpdate={() => {
+            stateHandler("trackDurationPlayed", ref.current.currentTime);
+          }}
+          onEnded={() => {
+            stateHandler("play", false);
+            controlListener({ type: "ended" });
+          }}
+          onLoadedMetadata={(value) => {
+            stateHandler("trackDuration", ref.current.duration);
+          }}
+        ></audio>
+        {playerState["playerClosed"] && (
           <div className={`${classes.container}`}>
             <div>
               <input
                 type="range"
                 className={`${classes.slider}`}
-                onChange={onRangeChangeListener}
+                onChange={(e) => {
+                  controlListener({ type: "seek", payload: e.target.value });
+                  stateHandler("trackDurationPlayed", e.target.value);
+                }}
                 value={playerState["trackDurationPlayed"]}
                 min={0}
                 max={playerState["trackDuration"]}
@@ -173,13 +89,15 @@ const AudioComponent = ({
             <div className={`${classes.controls}`}>
               <div
                 className={`${classes.icons} `}
-                onClick={(e) => playerStateManipulator("optMenu", true)}
+                onClick={(e) => {
+                  stateHandler("optMenu", !playerState["optMenu"]);
+                }}
               >
                 <PiDotsThreeOutlineFill />
               </div>
               <div
                 className={`${classes.icons}`}
-                onClick={onClickBackWardListener}
+                onClick={(e) => controlListener({ type: "backward" })}
               >
                 <FaBackward />
               </div>
@@ -187,26 +105,31 @@ const AudioComponent = ({
                 {playerState["play"] ? (
                   <FaPause
                     onClick={(e) => {
-                      playerStateManipulator("play", false);
+                      console.log("Player *****", playerState["play"]);
+                      controlListener({ type: "pause" });
                     }}
                   />
                 ) : (
                   <FaPlay
                     onClick={(e) => {
-                      playerStateManipulator("play", true);
+                      console.log("Player**** ", playerState["play"]);
+                      controlListener({ type: "play" });
                     }}
                   />
                 )}
               </div>
               <div
                 className={`${classes.icons}`}
-                onClick={onClickForwardListener}
+                onClick={(e) => controlListener({ type: "forward" })}
               >
                 <FaForward />
               </div>
               <div
                 className={`${classes.icons}`}
-                onClick={(e) => playerStateManipulator("playerClosed", false)}
+                onClick={(e) => {
+                  stateHandler("playerClosed", !playerState["playerClosed"]);
+                  controlListener({ type: "close" });
+                }}
               >
                 <GrClose />
               </div>
@@ -218,9 +141,14 @@ const AudioComponent = ({
                   return (
                     <span
                       key={`${playRate}_${index}`}
-                      onClick={(e) =>
-                        playerStateManipulator("playbackRate", playRate)
-                      }
+                      onClick={(e) => {
+                        stateHandler("playbackRate", playRate);
+                        stateHandler("optMenu", !playerState["optMenu"]);
+                        controlListener({
+                          type: "playBackRate",
+                          payload: playRate === "normal" ? 1 : playRate,
+                        });
+                      }}
                     >
                       {playRate}
                     </span>
@@ -229,10 +157,10 @@ const AudioComponent = ({
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </React.Fragment>
   );
-};
+});
 
 export default AudioComponent;

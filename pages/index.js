@@ -1,6 +1,6 @@
 /** @format */
 
-import AdComponent from "@/Component/AudioComponent/AdComponent";
+import AudioComponent from "@/Component/AudioComponent/AudioComponent";
 import Tracks from "@/Component/Tracks";
 import React, { useState } from "react";
 
@@ -61,7 +61,10 @@ export default function Home() {
       <div style={{ fontSize: "2.4rem" }}>{track}</div>
       <div>
         <Tracks onClick={onClickListener} />
-        <AdComponent ref={audioRef} controlListener={controlListenerHanlder} />
+        <AudioComponent
+          ref={audioRef}
+          controlListener={controlListenerHanlder}
+        />
       </div>
     </React.Fragment>
   );
